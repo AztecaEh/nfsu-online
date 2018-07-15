@@ -7,6 +7,7 @@
 	#include <time.h>
 	#include <stdio.h>
 	#include <math.h>
+	#include <iostream>
 
 	#ifdef _WIN32
 		#ifdef NT_SERVICE
@@ -38,6 +39,7 @@
 	#ifdef _WIN32
 		#define RETURNFROMTHREAD return
 	#else
+		#define _stricmp stricmp
 		#define RETURNFROMTHREAD return NULL
 		#define SOCKADDR sockaddr
 		#define SOCKADDR_IN sockaddr_in

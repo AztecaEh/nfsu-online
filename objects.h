@@ -26,9 +26,9 @@ class ConnectionClass {
 		unsigned int id;
 		bool Abort;
 		SOCKET sock;
-		char Buffer[1024];
-		char IP[20];
-		char Port[10];
+		char Buffer[4096];
+		char IP[32];
+		char Port[12];
 		unsigned long Received;
 		UserClass * user;
 		SOCKADDR_IN local_ip;

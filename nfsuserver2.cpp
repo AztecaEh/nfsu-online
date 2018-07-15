@@ -4,12 +4,14 @@
 	#pragma comment(lib, "ws2_32.lib")
 #endif
 
-#include "win_nix.h"
 #include "objects.h"
+#include "win_nix.h"
+#include "INIReader.h"
+#include <string>
 
 #ifndef _WIN32
 
-int stricmp( const char *b, const char *a ){
+int _stricmp( const char *b, const char *a ){
     while (*a != '\0' && *b != '\0' && tolower(*a) == tolower(*b)){
         a++;
         b++;
@@ -17,6 +19,7 @@ int stricmp( const char *b, const char *a ){
 
     return *a == *b ? 0 : tolower(*a)<tolower(*b) ? -1 : 1;
 }
+
 #endif
 
 #ifdef NT_SERVICE
@@ -42,7 +45,7 @@ bool BanV3;
 bool BanV4;
 
 FILE * logfil = NULL;  //file pointer for logfile
-char logtemp[1100];    //temp variable for logging
+char logtemp[8192];    //temp variable for logging
 FILE * tlogfil = NULL; //file pointer for traffic logfile
 
 char * news = NULL;
@@ -59,8 +62,8 @@ bool running = true;
 //connection queues
 ConnectionsClass RedirectConnections, ClientConnections, ReportingConnections;
 
-#define NFSU_LAN_VERSION "1.0.2"
-#define DEFAULT_NEWS "-=-=-=-\nDefault news\nPlz tell server admin to make news file ;)\n-=-=-=-=-"
+#define NFSU_LAN_VERSION "1.0.5"
+#define DEFAULT_NEWS "-=-=-=-\nDefault news\nPlease tell server admin to make news file\n-=-=-=-=-"
 
 ServerClass Server; //core ;)
 
@@ -71,13 +74,13 @@ void Log( char *log ){
         sprintf(logtemp, "[ %s  %s", ctime(& t), log);
         logtemp[26] = 32;
         logtemp[27] = 93;
-    }else{
+    }
+	else {
         strcpy(logtemp, log);
     }
-
-    if (EnableLogScreen)
-        printf(logtemp);
-
+	if (EnableLogScreen) {
+		printf(logtemp);
+	}
     if ((logfil != NULL) && (EnableLogFile)){
         fwrite(logtemp, strlen(logtemp), 1, logfil);
         fflush(logfil);
@@ -116,7 +119,7 @@ void LoadNews(){
 };
 
 threadfunc IOThread(void * Dummy){
-	char log[1024];	
+	char log[4096];	
 	MessageClass *msg;
 	ConnectionClass *temp;
 	ConnectionsClass *con=(ConnectionsClass*)Dummy;
@@ -169,7 +172,7 @@ threadfunc IOThread(void * Dummy){
 
 			msg=temp->OutgoingMessages.RemoveFirstMessage();
 			while(msg!=NULL){				
-				if(Verbose){
+				if(Verbose == true){
 					sprintf(log, "Sending outgoing message @ %s. Command: %s, IP : %s, SessionID : %u\n", con->Name, msg->Message, inet_ntoa(temp->remote_ip.sin_addr), temp->id);
 					Log(log);
 				}
@@ -207,7 +210,7 @@ threadfunc IOThread(void * Dummy){
 				if(temp->Received<12){
 					k=recv(temp->sock, temp->Buffer+temp->Received, 12-temp->Received, 0);
 					if(k<1){						
-						if(Verbose){
+						if(Verbose == true){
 							sprintf(log, "Receiving command failed - connection closed @ %s. IP : %s, SessionID : %u\n", con->Name, inet_ntoa(temp->remote_ip.sin_addr), temp->id);
 							Log(log);						
 						}
@@ -222,11 +225,11 @@ threadfunc IOThread(void * Dummy){
 					//sprintf(log, "Receiving command data.\n");
 					//Log(log);
 					DWORD req=(temp->Buffer[11]&0xFF)|((temp->Buffer[10]<<8)&0xFF00)|((temp->Buffer[9]<<16)&0xFF0000)|((temp->Buffer[8]<<24)&0xFF000000);
-//					WSASetLastError(0);
+					//WSASetLastError(0);
 					if((req>12)&&(req<1000)){
 						k=recv(temp->sock, temp->Buffer+temp->Received, req-temp->Received, 0);
 						if(k<1){							
-							if(Verbose){
+							if(Verbose == true){
 								sprintf(log, "Receiving command failed - connection closed @ %s. IP : %s, SessionID : %u\n", con->Name, inet_ntoa(temp->remote_ip.sin_addr), temp->id);
 								Log(log);
 							}
@@ -242,7 +245,7 @@ threadfunc IOThread(void * Dummy){
 						temp->Abort=true;
 					}
 					if(temp->Received==req){						
-						if(Verbose){
+						if(Verbose == true){
 							sprintf(log, "Receiving data complete @ %s. Command : %s, IP : %s, SessionID  :%u\n", con->Name, temp->Buffer, inet_ntoa(temp->remote_ip.sin_addr), temp->id);
 							Log(log);
 						}
@@ -326,7 +329,7 @@ threadfunc RedirectorWorker(void *Dummy){
 			while(msg!=NULL){
 				free(msg->Message);
 				free(msg);				
-				if(Verbose){
+				if(Verbose == true){
 					sprintf(log, "Adding outgoing message : server_info_to_nfsu : %s\n", inet_ntoa(temp->remote_ip.sin_addr));
 					Log(log);
 				}
@@ -350,6 +353,7 @@ threadfunc RedirectorWorker(void *Dummy){
 	}
 };
 
+/*
 void Subscribe(){
 	struct hostent *hostInfo = gethostbyname("3priedez.net");
 	SOCKADDR_IN remote_sockaddr_in;
@@ -386,6 +390,7 @@ threadfunc WebReport(void *dummy){
 		Sleep(1000*60*5);
 	}
 };
+*/
 
 threadfunc ListenerWorker(void *Dummy){
 	char log[1024];
@@ -525,21 +530,21 @@ threadfunc ListenerWorker(void *Dummy){
 							case 'c':
 								//gcre
 								if(strncmp(buf+2, "re", 2)==0){							
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "Creating challenge\n");
 										Log(log);
 									}
 									GameClass *game=(GameClass*)calloc(1, sizeof(GameClass));
 									tmp=strchr(buf+17, 10);
 									if(tmp==NULL) tmp=strchr(buf+17, 9);									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After getting challenge name\n");
 										Log(log);
 									}
 									tmp[0]=0;
 									tmp+=6;
 									strcpy(game->Name, buf+17);									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After name copy\n");
 										Log(log);
 									}
@@ -548,7 +553,7 @@ threadfunc ListenerWorker(void *Dummy){
 									tmp2[0]=0;
 									RoomClass *room=Server.Rooms.RoomFromName(tmp);
                                     
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After getting room\n");
 										Log(log);
 									}
@@ -558,14 +563,14 @@ threadfunc ListenerWorker(void *Dummy){
 									if(tmp2==NULL) tmp2=strchr(tmp, 9);
 									tmp2[0]=0;
 																		
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "Before atoi : %u - %s\n", game->max, tmp);
 										Log(log);
 									}
 
 									game->max=atoi(tmp);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After getting max\n");
 										Log(log);
 									}
@@ -576,7 +581,7 @@ threadfunc ListenerWorker(void *Dummy){
 									tmp2[0]=0;
 									game->min=atoi(tmp);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After getting min\n");
 										Log(log);
 									}
@@ -587,7 +592,7 @@ threadfunc ListenerWorker(void *Dummy){
 									tmp2[0]=0;
 									game->sysflags=atoi(tmp);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After getting sysflags\n");
 										Log(log);
 									}
@@ -595,21 +600,21 @@ threadfunc ListenerWorker(void *Dummy){
 									tmp=tmp2+8;
 									strcpy(game->params, tmp);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After setting all params\n");
 										Log(log);
 									}
 
 									room->Games.AddGame(game);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After adding game to room.games\n");
 										Log(log);
 									}
 
 									game->AddUser(user, buffer);
 									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "After adding user\n");
 										Log(log);
 									}
@@ -699,7 +704,7 @@ threadfunc ListenerWorker(void *Dummy){
 							case 'e':
 								//mesg
 								if(strncmp(buf+2, "sg", 2)==0){
-									if(Verbose) {
+									if(Verbose == true) {
 										sprintf(log, "Message received from %s\n", temp->user->IP);
 										Log(log);
 									}
@@ -707,7 +712,7 @@ threadfunc ListenerWorker(void *Dummy){
 									temp->OutgoingMessages.AddMessage(MakeMessage(buffer, "mesg", NULL, 0));//reply that msg is recv
 
 									if(strncmp(buf+12, "TEXT", 4)!=0){
-										if(Verbose) {
+										if(Verbose == true) {
 											sprintf(log, "Private message\n");
 											Log(log);
 										}
@@ -732,7 +737,7 @@ threadfunc ListenerWorker(void *Dummy){
 													us->Connection->OutgoingMessages.AddMessage(MakeMessage(buffer, "+msg", arr, 3));
 												}
 											}else{
-												if(Verbose) {
+												if(Verbose == true) {
 													sprintf(log, "Didn't find user\n");
 													Log(log);
 												}
@@ -742,7 +747,7 @@ threadfunc ListenerWorker(void *Dummy){
 											Log(log);
 										}
 									}else{
-										if(Verbose) {
+										if(Verbose == true) {
 											sprintf(log, "Global message\n");
 											Log(log);
 										}
@@ -770,7 +775,7 @@ threadfunc ListenerWorker(void *Dummy){
 							case 'o':
 								//room
 								if(strncmp(buf+2, "om", 2)==0){							
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "Create room\n");
 										Log(log);
 									}
@@ -852,7 +857,7 @@ threadfunc ListenerWorker(void *Dummy){
 									case 'x':
 										//auxi
 										if(buf[3]=='i'){											
-											if(Verbose){
+											if(Verbose == true){
 												sprintf(log, "Car received\n");
 												Log(log);
 											}
@@ -865,7 +870,7 @@ threadfunc ListenerWorker(void *Dummy){
 										//auth
 										if(buf[3]=='h'){
 											IsNew=true;											
-											if(Verbose){
+											if(Verbose == true){
 												sprintf(log, "auth\n");
 												Log(log);
 											}
@@ -912,7 +917,7 @@ NETV=5
 											tmp2[0]=0;
 											RegUser *tr=Server.ru.UserFromUsername(tmp);
 											if(tr==NULL){												
-												if(Verbose){
+												if(Verbose == true){
 													sprintf(log, "No such user\n");
 													Log(log);
 												}
@@ -920,7 +925,7 @@ NETV=5
 											}else{
 												user=Server.Users.UserFromUsername(tmp);
 												if(user==NULL){																	
-													if(Verbose){
+													if(Verbose == true){
 														sprintf(log, "New user\n");
 														Log(log);
 													}
@@ -947,7 +952,7 @@ NETV=5
 														temp->Abort=true;
 													}else{
 														IsNew=false;													
-														if(Verbose){
+														if(Verbose == true){
 															sprintf(log, "Found user\n");
 															Log(log);
 														}
@@ -1009,7 +1014,7 @@ NETV=5
 								if(strncmp(buf+2, "ct", 2)==0){
 									tmp=strchr(buf+17, 10);
 									tmp[0]=0;									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "Try to register username\n");
 										Log(log);
 									}
@@ -1028,7 +1033,7 @@ NETV=5
 							case 'd':
 								//addr
 								if(strncmp(buf+2, "dr", 2)==0){									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "addr\n");			
 										Log(log);									
 									}
@@ -1040,12 +1045,12 @@ NETV=5
 									//strcpy(temp->IP, buf+17);
 									//if(strcmp(temp->IP, "0.0.0.0")==0){
 									//	sprintf(log, "Client sent 0.0.0.0\n");
-									//	if(Verbose)Log(log);
+									//	if(Verbose == true)Log(log);
 									//	sockaddr_in so;
 									//	k=sizeof(so);			
 									//	strcpy(temp->IP, inet_ntoa(temp->remote_ip.sin_addr));
 									//}									
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "IP: %s\n", temp->IP);
 										Log(log);
 									}
@@ -1088,7 +1093,7 @@ NETV=5
 										sprintf(arr2[1], "NAME=%s", user->Username);
 										temp->OutgoingMessages.AddMessage(MakeMessage(buffer, "cper", arr, 2));
 									}else{										
-										if(Verbose){
+										if(Verbose == true){
 											sprintf(buffer, "Panic - user tries to create subaccount name without having username.\n");
 											Log(buffer);
 										}
@@ -1155,7 +1160,7 @@ S=1,wins_in_hex,loses_in_hex,
 0x00A0   36 38 64 00 2B 73 6E 70-00 00 00 00 00 00 00 A2   68d.+snp.......¢
 */
 								if(strncmp(buf+2, "ap", 2)==0){
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "Rank list\n");
 										Log(log);
 									}
@@ -1204,7 +1209,7 @@ S=1,wins_in_hex,loses_in_hex,
 							case 'k':
 								//skey
 								if(strncmp(buf+2, "ey", 2)==0){							
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "skey\n");
 										Log(log);
 									}
@@ -1215,7 +1220,7 @@ S=1,wins_in_hex,loses_in_hex,
 							case 'e':
 								//sele
 								if(strncmp(buf+2, "le", 2)==0){							
-									if(Verbose){
+									if(Verbose == true){
 										sprintf(log, "sele\n");
 										Log(log);
 									}
@@ -1234,7 +1239,7 @@ S=1,wins_in_hex,loses_in_hex,
 						break;
 					case 'u':
 						if(strncmp(buf+1, "ser", 3)==0){
-							if(Verbose){
+							if(Verbose == true){
 								sprintf(log, "user\n");
 								Log(log);
 							}
@@ -1257,7 +1262,7 @@ S=1,wins_in_hex,loses_in_hex,
 						}
 						break;
 					default:						
-						if(Verbose){
+						if(Verbose == true){
 							sprintf(log, "Other recv: %s\n", buf);
 							Log(log);
 						}
@@ -1302,7 +1307,7 @@ threadfunc ClientReporter(void *Dummy){
 			closesocket(ClientReportingSocket);
 			RETURNFROMTHREAD;
 		}		
-		if(Verbose){
+		if(Verbose == true){
 			sprintf(tempBuff, "Server finder connected from %s\n", inet_ntoa(remote_sockaddr_in.sin_addr));
 			Log(tempBuff);
 		}
@@ -1338,7 +1343,7 @@ threadfunc ClientReporterTcp(void *Dummy){
 #else
 			getpeername(cl, (SOCKADDR *)&remote_sockaddr_in,(int*) &remote_sockaddr_length);
 #endif			
-			if(Verbose){
+			if(Verbose == true){
 				sprintf(tempBuff, "Server finder connected from %s\n", inet_ntoa(remote_sockaddr_in.sin_addr));
 				Log(tempBuff);
 			}
@@ -1372,7 +1377,7 @@ threadfunc StatThread(void *Dummy){
 #else
 			getpeername(cl, (SOCKADDR *)&remote_sockaddr_in,(int*) &remote_sockaddr_length);
 #endif			
-			if(Verbose){
+			if(Verbose == true){
 				sprintf(tempBuff, "Stat client connected from %s\n", inet_ntoa(remote_sockaddr_in.sin_addr));
 				Log(tempBuff);
 			}
@@ -1493,21 +1498,26 @@ VOID WINAPI ServiceCtrlHandler(DWORD dwControl)
 } 
 #endif
 
-bool InitServer(){
-#ifdef NT_SERVICE
-	EnableLogFile=GetPrivateProfileInt("NFSU:LAN", "EnableLogFile", 1, "nfsu.ini");
-	EnableLogScreen=false;
-	RewriteLogFile=GetPrivateProfileInt("NFSU:LAN", "RewriteLogFile", 1, "nfsu.ini");
-	DisableTimeStamp=GetPrivateProfileInt("NFSU:LAN", "DisableTimeStamp", 0, "nfsu.ini");
-	Verbose=GetPrivateProfileInt("NFSU:LAN", "Verbose", 0, "nfsu.ini");
-	RegisterGlobal=GetPrivateProfileInt("NFSU:LAN", "RegisterGlobal", 0, "nfsu.ini");
-	LogAllTraffic=GetPrivateProfileInt("NFSU:LAN", "LogAllTraffic", 0, "nfsu.ini");
-	BanV1=GetPrivateProfileInt("NFSU:LAN", "BanV1", 0, "nfsu.ini");
-	BanV2=GetPrivateProfileInt("NFSU:LAN", "BanV2", 0, "nfsu.ini");
-	BanV3=GetPrivateProfileInt("NFSU:LAN", "BanV3", 0, "nfsu.ini");
-	BanV4=GetPrivateProfileInt("NFSU:LAN", "BanV4", 0, "nfsu.ini");
-	GetPrivateProfileString("NFSU:LAN", "ServerName", "LAN Service server", Server.Name, 100, "nfsu.ini");
-#endif
+bool InitServer() {
+	#ifdef NT_SERVICE
+		EnableLogScreen = false;
+	#else
+		EnableLogScreen = true;
+	#endif
+
+	INIReader reader("nfsu.ini");
+	EnableLogFile = reader.GetInteger("NFSU:LAN", "EnableLogFile", 1);
+	RewriteLogFile = reader.GetInteger("NFSU:LAN", "EnableLogFile", 0);
+	DisableTimeStamp = reader.GetInteger("NFSU:LAN", "DisableTimeStamp", 0);
+	Verbose = reader.GetInteger("NFSU:LAN", "Verbose", 1);
+	RegisterGlobal = reader.GetInteger("NFSU:LAN", "RegisterGlobal", 0);
+	LogAllTraffic = reader.GetInteger("NFSU:LAN", "LogAllTraffic", 1);
+	BanV1 = reader.GetInteger("NFSU:LAN", "BanV1", 0);
+	BanV2 = reader.GetInteger("NFSU:LAN", "BanV2", 0);
+	BanV3 = reader.GetInteger("NFSU:LAN", "BanV3", 0);
+	BanV4 = reader.GetInteger("NFSU:LAN", "BanV4", 0);
+	strcpy(Server.Name, reader.Get("NFSU:LAN", "ServerName", "Default server name").c_str());
+	//flag{HardTarget18}
 
 	time(&curtime);
 	RoomClass *room;
@@ -1547,9 +1557,11 @@ bool InitServer(){
 	int k;
 	char log[1024];
 
+	/*
 	if(Server.Name[0]==0){
 		strcpy(Server.Name, "Default server name");
 	}
+	*/
 
 	//opening logfile
 	if(EnableLogFile){
@@ -1573,7 +1585,16 @@ bool InitServer(){
 		}
 	}
 
-	sprintf(log, "%s NFSU:LAN server [%s] v %s starting\n", Server.Name, SERVER_PLATFORM, NFSU_LAN_VERSION);
+#ifndef _WIN32
+	int numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+	sprintf(log, "There are %s cores on this machine.\n", std::to_string(numCPU));
+	Log(log);
+#endif
+	/*if (Verbose == true) {
+		sprintf(log, "Verbose mode is ON.\n");
+	}
+	Log(log);*/
+	sprintf(log, "%s NFSU:LAN server [%s] v %s is starting\n", Server.Name, SERVER_PLATFORM, NFSU_LAN_VERSION);
 	Log(log);
 	
 #ifdef _WIN32
@@ -1688,9 +1709,8 @@ bool InitServer(){
 	_beginthread(ClientReporter, 0, NULL);
 	_beginthread(ClientReporterTcp, 0, NULL);
 	_beginthread(StatThread, 0, NULL);
-	if(RegisterGlobal)
-		_beginthread(WebReport, 0, NULL);
-
+	//if(RegisterGlobal)
+		//_beginthread(WebReport, 0, NULL);
 	return true;
 }
 
@@ -1859,7 +1879,7 @@ int main(int argc, char* argv[]){
     WriteInLogFile( g_Msg );
 
 	// Install a Service if -i switch used
-    if ( argc > 1 && !( stricmp(argv[1], "-i") ) )
+    if ( argc > 1 && !( _stricmp(argv[1], "-i") ) )
 	{
         char szBuffer[255];
         char szPath[MAX_PATH];
@@ -1909,7 +1929,7 @@ int main(int argc, char* argv[]){
         CloseServiceHandle(scmHandle);
 
     }
-    else if ( argc > 1 && !( stricmp(argv[1], "-u" ) ) ) // Uninstall the Service
+    else if ( argc > 1 && !( _stricmp(argv[1], "-u" ) ) ) // Uninstall the Service
     {
         SC_HANDLE scmHandle = OpenSCManager (NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -1967,6 +1987,7 @@ int main(int argc, char* argv[]){
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
+	/*
 	EnableLogFile=true;
 	EnableLogScreen=true;
 	RewriteLogFile=true;
@@ -1979,7 +2000,7 @@ int main(int argc, char* argv[]){
 	BanV2=false;
 	BanV3=false;
 	BanV4=false;
-
+	*/
 #ifndef _WIN32
 	bool daemon=false;
 	bool writepid=false;
@@ -1988,47 +2009,47 @@ int main(int argc, char* argv[]){
 	//parse commandline
 	for(int k=1;k<argc;k++){
 #ifndef _WIN32
-		if(stricmp(argv[k], "-d")==0){
+		if(_stricmp(argv[k], "-d")==0){
 			daemon=true;
 		}
-		if(stricmp(argv[k], "-p")==0){
+		if(_stricmp(argv[k], "-p")==0){
 			writepid=true;
 		}
 #endif
-		if(stricmp(argv[k], "enablelogfile")==0){
+		if(_stricmp(argv[k], "enablelogfile")==0){
 			EnableLogFile=true;
 		}
-		if(stricmp(argv[k], "registerglobal")==0){
+		if(_stricmp(argv[k], "registerglobal")==0){
 			RegisterGlobal=true;
 		}
-		if(stricmp(argv[k], "verbose")==0){
+		if(_stricmp(argv[k], "verbose")==0){
 			Verbose=true;
 		}
-		if(stricmp(argv[k], "disablelogscreen")==0){
+		if(_stricmp(argv[k], "disablelogscreen")==0){
 			EnableLogScreen=false;
 		}
-		if(stricmp(argv[k], "rewritelogfile")==0){
+		if(_stricmp(argv[k], "rewritelogfile")==0){
 			RewriteLogFile=true;
 		}
-		if(stricmp(argv[k], "disabletimestamp")==0){
+		if(_stricmp(argv[k], "disabletimestamp")==0){
 			DisableTimeStamp=true;
 		}
 		if(strstr(argv[k], "servername=")!=NULL){
 			strncpy(Server.Name, strstr(argv[k], "servername=")+11, 99);
 		}
-		if(stricmp(argv[k], "logalltraffic")==0){
+		if(_stricmp(argv[k], "logalltraffic")==0){
 			LogAllTraffic=true;
 		}
-		if(stricmp(argv[k], "banv1")==0){
+		if(_stricmp(argv[k], "banv1")==0){
 			BanV1=true;
 		}
-		if(stricmp(argv[k], "banv2")==0){
+		if(_stricmp(argv[k], "banv2")==0){
 			BanV2=true;
 		}
-		if(stricmp(argv[k], "banv3")==0){
+		if(_stricmp(argv[k], "banv3")==0){
 			BanV3=true;
 		}
-		if(stricmp(argv[k], "banv4")==0){
+		if(_stricmp(argv[k], "banv4")==0){
 			BanV4=true;
 		}
 	}

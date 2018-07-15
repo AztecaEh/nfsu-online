@@ -802,7 +802,7 @@ RegUser *RegUsers::UserFromUsername( char *username ) {
 	RegUser * temp = First;
 
 	while (temp != NULL) {
-		if (stricmp (temp->Username, username) == 0) {
+		if (_stricmp (temp->Username, username) == 0) {
 			return temp;
 		}
 		temp = temp->Next;

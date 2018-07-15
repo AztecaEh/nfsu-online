@@ -1,31 +1,40 @@
-# Project: nfsuserver
-# Makefile created by Dev-C++ 4.9.5.0
+CC			= gcc
+CXX			= g++
+OBJ			= objects.o nfsuserver2.o server.o ini.o INIReader.o
+LIBS		= -L"/lib" -lpthread
+INCS		= #-I "."
 
-CC   = g++
-WINDRES = windres.exe
-RES  = 
-OBJ  = nfsuserver2.o objects.o server.o $(RES)
-LIBS =  -L"/lib" -lpthread
-INCS =  #-I "." 
-BIN  = nfsuserver
-CFLAGS = $(INCS) -s -O2 -fexpensive-optimizations
+ifeq ($(CFG),debug)
+	CXXFLAGS	= -g
+	CFLAGS		= -g
+	BIN			= nfsuserver_debug
+else
+	CXXFLAGS	= $(INCS) -s -O3 -fexpensive-optimizations --static
+	CFLAGS		= -s -O3 --static
+	BIN			= nfsuserver
+endif
 
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before nfsuserver all-after
-
+all: all-before $(BIN) all-after
 
 clean: clean-custom
 	rm -f $(OBJ) $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) $(OBJ) -o "nfsuserver" $(LIBS) $(CFLAGS)
+	$(CXX) $(OBJ) -o "$(BIN)" $(LIBS) $(CXXFLAGS)
 
 nfsuserver2.o: nfsuserver2.cpp
-	$(CC) -c nfsuserver2.cpp -o nfsuserver2.o $(CFLAGS)
+	$(CXX) -c nfsuserver2.cpp -o nfsuserver2.o $(CXXFLAGS)
 
 server.o: server.cpp
-	$(CC) -c server.cpp -o server.o $(CFLAGS)
+	$(CXX) -c server.cpp -o server.o $(CXXFLAGS)
 
 objects.o: objects.cpp
-	$(CC) -c objects.cpp -o objects.o $(CFLAGS)
+	$(CXX) -c objects.cpp -o objects.o $(CXXFLAGS)
+
+ini.o: ini.c
+	$(CC) -c ini.c -o ini.o $(CFLAGS)
+
+INIReader.o: INIReader.cpp
+	$(CXX) -c INIReader.cpp -o INIReader.o $(CXXFLAGS)
