@@ -61,7 +61,7 @@ bool running = true;
 //connection queues
 ConnectionsClass RedirectConnections, ClientConnections, ReportingConnections;
 
-#define NFSU_LAN_VERSION "1.0.5"
+#define NFSU_LAN_VERSION "1.0.6"
 #define DEFAULT_NEWS "-=-=-=-\nDefault news\nPlease tell server admin to make news file\n-=-=-=-=-"
 
 ServerClass Server; //core ;)
@@ -1520,7 +1520,7 @@ bool InitServer() {
 	time(&curtime);
 	RoomClass *room;
 
-	std::vector<std::string> RoomList;
+	/*std::vector<std::string> RoomList;
 	std::ifstream infile("rooms.txt");
 	if (infile.fail()) {
 		std::string RoomList[] = { "Default Room" };
@@ -1540,8 +1540,42 @@ bool InitServer() {
 		room->IsGlobal = true;
 		strcpy(room->Name, ThisRoom.c_str());
 		Server.Rooms.AddRoom(room);
-	}
+	}*/
 
+	time(&curtime);
+	RoomClass *room;
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "A");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "B");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "C");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "D");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "E");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "F");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "G");
+	Server.Rooms.AddRoom(room);
+	room = (RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal = true;
+	strcpy(room->Name, "H");
+	Server.Rooms.AddRoom(room);
 	int k;
 	char log[1024];
 
