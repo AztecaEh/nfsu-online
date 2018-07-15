@@ -28,6 +28,10 @@ UsersClass::UsersClass() {
 	First = NULL;
 } ;
 
+GamesClass::GamesClass() {
+	cid = 0;
+}
+
 void UserClass::SelectPerson( char *person ) {
 	int k;
 	k = 0;
