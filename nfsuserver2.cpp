@@ -1542,8 +1542,6 @@ bool InitServer() {
 		Server.Rooms.AddRoom(room);
 	}*/
 
-	time(&curtime);
-	RoomClass *room;
 	room = (RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal = true;
 	strcpy(room->Name, "A");
