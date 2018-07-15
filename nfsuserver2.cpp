@@ -1516,32 +1516,29 @@ bool InitServer() {
 	BanV3 = reader.GetInteger("NFSU:LAN", "BanV3", 0);
 	BanV4 = reader.GetInteger("NFSU:LAN", "BanV4", 0);
 	strcpy(Server.Name, reader.Get("NFSU:LAN", "ServerName", "Default server name").c_str());
-	//flag{HardTarget18}
 
 	time(&curtime);
 	RoomClass *room;
 
-	std::ifstream f("rooms");
-
-	/*if (!f) {
-		char * RoomList[] = { "Default Room" };
-	} else {
-		std::string line;
-		std::list<std::string> mylist;
-
-		while (std::getline(f, line))
-		{
-			mylist.push_back(line.cstr());
-			mylist.back();
+	std::vector<std::string> RoomList;
+	std::ifstream infile("rooms.txt");
+	if (infile.fail()) {
+		std::string RoomList[] = { "Default Room" };
+	}
+	std::string line;
+	while (std::getline(infile, line))
+	{
+		std::istringstream iss(line);
+		std::string RoomName;
+		if (iss >> RoomName) {
+			RoomList.push_back(RoomName);
 		}
-		char * RoomList[] = { "Default Room" };
-	}*/
-	char * RoomList[] = { "Default Room" };
+	}
 
-	for (auto &&ThisRoom : RoomList) {
+	for (std::string ThisRoom : RoomList) {
 		room = (RoomClass*)calloc(1, sizeof(RoomClass));
 		room->IsGlobal = true;
-		strcpy(room->Name, ThisRoom);
+		strcpy(room->Name, ThisRoom.c_str());
 		Server.Rooms.AddRoom(room);
 	}
 

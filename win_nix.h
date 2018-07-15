@@ -8,6 +8,11 @@
 	#include <stdio.h>
 	#include <math.h>
 	#include <iostream>
+	#include <string.h>
+	#include <fstream>
+	#include <sstream>
+	#include <vector>
+	#include <list>
 
 	#ifdef _WIN32
 		#ifdef NT_SERVICE
@@ -21,7 +26,6 @@
 		#include <signal.h>
 		#include <errno.h>
 		#include <fcntl.h>
-		#include <string.h>
 		#include <unistd.h>
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
