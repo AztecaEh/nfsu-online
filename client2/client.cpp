@@ -160,9 +160,9 @@ bool WriteHosts() {
 		struct in_addr addr;
 		addr.S_un.S_addr = CurrentServer->ip;
 		strcpy (tm, inet_ntoa (addr));
-		sprintf(buf, "%s\tps2nfs04.ea.com", tm);
+		sprintf(buf, "\n%s\tps2nfs04.ea.com", tm);
 	}else{
-		strcpy (buf, "127.0.0.1\tps2nfs04.ea.com");
+		strcpy (buf, "\n127.0.0.1\tps2nfs04.ea.com");
 	}
 	strcat (out, buf);
 	fil = fopen (fname, "w");
@@ -326,7 +326,7 @@ void upd( void *dummy ) {
 	EnableWindow (GetDlgItem (dwnd, IDC_ADD), false);
 	EnableWindow (GetDlgItem (dwnd, IDC_FIND), false);
 	EnableWindow (GetDlgItem (dwnd, IDC_REFRESH), false);
-	EnableWindow (GetDlgItem (dwnd, IDC_GETLIST), false);
+	//EnableWindow (GetDlgItem (dwnd, IDC_GETLIST), false);
 	EnableWindow (GetDlgItem (dwnd, IDC_LAN), false);
 	Servers.Update ();
 	EnableWindow (GetDlgItem (dwnd, IDC_SERVERLIST), true);
@@ -338,6 +338,7 @@ void upd( void *dummy ) {
 	EnableWindow (GetDlgItem (dwnd, IDC_LAN), (CurrentServer != NULL));
 } ;
 
+/*
 void updw( void *dummy ) {
 	EnableWindow (GetDlgItem (dwnd, IDC_LAN), false);
 	EnableWindow (GetDlgItem (dwnd, IDC_SERVERLIST), false);
@@ -356,6 +357,7 @@ void updw( void *dummy ) {
 	EnableWindow (GetDlgItem (dwnd, IDC_REFRESH), true);
 	EnableWindow (GetDlgItem (dwnd, IDC_GETLIST), true);
 } ;
+*/
 
 BOOL CALLBACK MainDlgProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 	LPNMHDR pnf;
@@ -387,12 +389,12 @@ BOOL CALLBACK MainDlgProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			break;
 		case WM_COMMAND:
 			switch (LOWORD (wParam)) {
-				case IDC_GETLIST:
+				/*case IDC_GETLIST:
 					_beginthread (updw, 0, NULL);
-					break;
-				case IDC_FIND:
+					break;*/
+				/*case IDC_FIND:
 					SendData ("nfs:u");
-					break;
+					break;*/
 				case IDC_ADD:
 					DialogBox (hinst, MAKEINTRESOURCE (IDD_ADD), dwnd, &DlgAdd);
 					break;
@@ -418,7 +420,7 @@ BOOL CALLBACK MainDlgProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					EnableWindow (GetDlgItem (dwnd, IDC_ADD), !IsDlgButtonChecked (hwndDlg, IDC_LAN));
 					EnableWindow (GetDlgItem (dwnd, IDC_FIND), !IsDlgButtonChecked (hwndDlg, IDC_LAN));
 					EnableWindow (GetDlgItem (dwnd, IDC_REFRESH), !IsDlgButtonChecked (hwndDlg, IDC_LAN));
-					EnableWindow (GetDlgItem (dwnd, IDC_GETLIST), !IsDlgButtonChecked (hwndDlg, IDC_LAN));
+					//EnableWindow (GetDlgItem (dwnd, IDC_GETLIST), !IsDlgButtonChecked (hwndDlg, IDC_LAN));
 					break;
 			}
 			break;
@@ -751,11 +753,11 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	localsin.sin_port = htons (10900);
 	int k = bind (RedirectSocket, (SOCKADDR *)&localsin, sizeof (SOCKADDR_IN));
 
-	if (k == INVALID_SOCKET) {
-		MessageBox (0, "Could not initialize redirect socket\nMaybe you have server started on this box.", "Error", MB_OK);
+	//if (k == INVALID_SOCKET) {
+		//MessageBox (0, "Could not initialize redirect socket\nMaybe you have server started on this box.", "Error", MB_OK);
 		closesocket(RedirectSocket);
 		RedirectSocket=INVALID_SOCKET;
-	}else{
+	/*}else{
 		//listen to ports
 		listen (RedirectSocket, 100);
 		strcpy (RedirectConnections.Name, "RedirectConnections");
@@ -767,7 +769,7 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 		_beginthread(IOThread, 0, (void *)&RedirectConnections);
 		_beginthread(RedirectorWorker, 0, NULL);
 		_beginthread(Maintenance, 0, NULL);
-	}
+	}*/
 
 	StartListener ();
 

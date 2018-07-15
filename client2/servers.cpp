@@ -273,7 +273,7 @@ void ClServersClass::Update() {
 		temp = temp->Next;
 	}
 } ;
-void ClServersClass::UpdateFromWeb() {
+/*void ClServersClass::UpdateFromWeb() {
 	char fname[1024];
 	char buf[1024];
 	srand (time (NULL));
@@ -306,3 +306,4 @@ void ClServersClass::UpdateFromWeb() {
 		fclose (fil);
 	}
 } ;
+*/
