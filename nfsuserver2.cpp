@@ -7,7 +7,6 @@
 #include "objects.h"
 #include "win_nix.h"
 #include "INIReader.h"
-#include <string>
 
 #ifndef _WIN32
 
@@ -79,7 +78,7 @@ void Log( char *log ){
         strcpy(logtemp, log);
     }
 	if (EnableLogScreen) {
-		printf(logtemp);
+		printf(log);
 	}
     if ((logfil != NULL) && (EnableLogFile)){
         fwrite(logtemp, strlen(logtemp), 1, logfil);
@@ -1521,38 +1520,30 @@ bool InitServer() {
 
 	time(&curtime);
 	RoomClass *room;
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "A.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "B.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "C.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "D.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "E.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "F.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "G.LAN");
-	Server.Rooms.AddRoom(room);
-	room=(RoomClass*)calloc(1, sizeof(RoomClass));
-	room->IsGlobal=true;
-	strcpy(room->Name, "H.LAN");
-	Server.Rooms.AddRoom(room);	
+
+	std::ifstream f("rooms");
+
+	/*if (!f) {
+		char * RoomList[] = { "Default Room" };
+	} else {
+		std::string line;
+		std::list<std::string> mylist;
+
+		while (std::getline(f, line))
+		{
+			mylist.push_back(line.cstr());
+			mylist.back();
+		}
+		char * RoomList[] = { "Default Room" };
+	}*/
+	char * RoomList[] = { "Default Room" };
+
+	for (auto &&ThisRoom : RoomList) {
+		room = (RoomClass*)calloc(1, sizeof(RoomClass));
+		room->IsGlobal = true;
+		strcpy(room->Name, ThisRoom);
+		Server.Rooms.AddRoom(room);
+	}
 
 	int k;
 	char log[1024];
