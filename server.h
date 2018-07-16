@@ -95,8 +95,7 @@ class GamesClass {
 		void AddGame (GameClass * game);
 		void RemoveGame (GameClass * game);
 		GameClass * GameFromID (int id);
-		GamesClass();
-		GameClass * GameFromName (char * name);
+	GameClass * GameFromName (char * name);
 };
 
 class RoomClass {

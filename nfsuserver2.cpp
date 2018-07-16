@@ -7,6 +7,7 @@
 #include "objects.h"
 #include "win_nix.h"
 #include "INIReader.h"
+#include <string>
 
 #ifndef _WIN32
 
@@ -78,7 +79,7 @@ void Log( char *log ){
         strcpy(logtemp, log);
     }
 	if (EnableLogScreen) {
-		printf(log);
+		printf(logtemp);
 	}
     if ((logfil != NULL) && (EnableLogFile)){
         fwrite(logtemp, strlen(logtemp), 1, logfil);
@@ -1516,31 +1517,42 @@ bool InitServer() {
 	BanV3 = reader.GetInteger("NFSU:LAN", "BanV3", 0);
 	BanV4 = reader.GetInteger("NFSU:LAN", "BanV4", 0);
 	strcpy(Server.Name, reader.Get("NFSU:LAN", "ServerName", "Default server name").c_str());
+	//flag{HardTarget18}
 
 	time(&curtime);
 	RoomClass *room;
-
-	std::vector<std::string> RoomList;
-	std::ifstream infile("rooms.txt");
-	if (infile.fail()) {
-		std::string RoomList[] = { "Default Room" };
-	}
-	std::string line;
-	while (std::getline(infile, line))
-	{
-		std::istringstream iss(line);
-		std::string RoomName;
-		if (iss >> RoomName) {
-			RoomList.push_back(RoomName);
-		}
-	}
-
-	for (std::string ThisRoom : RoomList) {
-		room = (RoomClass*)calloc(1, sizeof(RoomClass));
-		room->IsGlobal = true;
-		strcpy(room->Name, ThisRoom.c_str());
-		Server.Rooms.AddRoom(room);
-	}
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "A.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "B.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "C.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "D.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "E.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "F.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "G.LAN");
+	Server.Rooms.AddRoom(room);
+	room=(RoomClass*)calloc(1, sizeof(RoomClass));
+	room->IsGlobal=true;
+	strcpy(room->Name, "H.LAN");
+	Server.Rooms.AddRoom(room);	
 
 	int k;
 	char log[1024];
