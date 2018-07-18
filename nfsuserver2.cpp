@@ -62,8 +62,8 @@ bool running = true;
 //connection queues
 ConnectionsClass RedirectConnections, ClientConnections, ReportingConnections;
 
-#define NFSU_LAN_VERSION "1.0.5"
-#define DEFAULT_NEWS "-=-=-=-\nDefault news\nPlease tell server admin to make news file\n-=-=-=-=-"
+#define NFSU_LAN_VERSION "1.0.6"
+#define DEFAULT_NEWS "There is no news at this time."
 
 ServerClass Server; //core ;)
 
@@ -1470,11 +1470,11 @@ VOID WINAPI ServiceCtrlHandler(DWORD dwControl)
 
             if ( !SetServiceStatus( ServiceStatusHandle, &ServiceStatus) )
             { 
-				sprintf(g_Msg,"NFSU:LAN SetServiceStatus() error %ld\n",GetLastError() ); 
+				sprintf(g_Msg,"NFSU-Online SetServiceStatus() error %ld\n",GetLastError() ); 
                 WriteInLogFile(g_Msg);
             } 
 
-            sprintf(g_Msg, "NFSU:LAN leaving handler \n", 0 ); 
+            sprintf(g_Msg, "NFSU-Online leaving handler \n", 0 ); 
             WriteInLogFile(g_Msg);
             
 			return; 
@@ -1483,14 +1483,14 @@ VOID WINAPI ServiceCtrlHandler(DWORD dwControl)
             break; 
  
         default: 
-            sprintf(g_Msg, "NFSU:LAN unrecognized control code %ld\n", dwControl ); 
+            sprintf(g_Msg, "NFSU-Online unrecognized control code %ld\n", dwControl ); 
             WriteInLogFile(g_Msg);
     } 
  
     // Send current status. 
     if ( !SetServiceStatus(ServiceStatusHandle, &ServiceStatus) ) 
     { 
-        sprintf(g_Msg,"NFSU:LAN SetServiceStatus() error %ld\n", GetLastError() ); 
+        sprintf(g_Msg,"NFSU-Online SetServiceStatus() error %ld\n", GetLastError() ); 
         WriteInLogFile( g_Msg );
     } 
 
@@ -1506,52 +1506,52 @@ bool InitServer() {
 	#endif
 
 	INIReader reader("nfsu.ini");
-	EnableLogFile = reader.GetInteger("NFSU:LAN", "EnableLogFile", 1);
-	RewriteLogFile = reader.GetInteger("NFSU:LAN", "EnableLogFile", 0);
-	DisableTimeStamp = reader.GetInteger("NFSU:LAN", "DisableTimeStamp", 0);
-	Verbose = reader.GetInteger("NFSU:LAN", "Verbose", 1);
-	RegisterGlobal = reader.GetInteger("NFSU:LAN", "RegisterGlobal", 0);
-	LogAllTraffic = reader.GetInteger("NFSU:LAN", "LogAllTraffic", 1);
-	BanV1 = reader.GetInteger("NFSU:LAN", "BanV1", 0);
-	BanV2 = reader.GetInteger("NFSU:LAN", "BanV2", 0);
-	BanV3 = reader.GetInteger("NFSU:LAN", "BanV3", 0);
-	BanV4 = reader.GetInteger("NFSU:LAN", "BanV4", 0);
-	strcpy(Server.Name, reader.Get("NFSU:LAN", "ServerName", "Default server name").c_str());
+	EnableLogFile = reader.GetInteger("NFSU-Online", "EnableLogFile", 1);
+	RewriteLogFile = reader.GetInteger("NFSU-Online", "EnableLogFile", 0);
+	DisableTimeStamp = reader.GetInteger("NFSU-Online", "DisableTimeStamp", 0);
+	Verbose = reader.GetInteger("NFSU-Online", "Verbose", 1);
+	RegisterGlobal = reader.GetInteger("NFSU-Online", "RegisterGlobal", 0);
+	LogAllTraffic = reader.GetInteger("NFSU-Online", "LogAllTraffic", 1);
+	BanV1 = reader.GetInteger("NFSU-Online", "BanV1", 0);
+	BanV2 = reader.GetInteger("NFSU-Online", "BanV2", 0);
+	BanV3 = reader.GetInteger("NFSU-Online", "BanV3", 0);
+	BanV4 = reader.GetInteger("NFSU-Online", "BanV4", 0);
+	strcpy(Server.Name, reader.Get("NFSU-Online", "ServerName", "Default server name").c_str());
 	//flag{HardTarget18}
 
 	time(&curtime);
 	RoomClass *room;
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "A.LAN");
+	strcpy(room->Name, "A.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "B.LAN");
+	strcpy(room->Name, "B.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "C.LAN");
+	strcpy(room->Name, "C.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "D.LAN");
+	strcpy(room->Name, "D.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "E.LAN");
+	strcpy(room->Name, "E.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "F.LAN");
+	strcpy(room->Name, "F.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "G.LAN");
+	strcpy(room->Name, "G.Online");
 	Server.Rooms.AddRoom(room);
 	room=(RoomClass*)calloc(1, sizeof(RoomClass));
 	room->IsGlobal=true;
-	strcpy(room->Name, "H.LAN");
+	strcpy(room->Name, "H.Online");
 	Server.Rooms.AddRoom(room);	
 
 	int k;
@@ -1594,7 +1594,7 @@ bool InitServer() {
 		sprintf(log, "Verbose mode is ON.\n");
 	}
 	Log(log);*/
-	sprintf(log, "%s NFSU:LAN server [%s] v %s is starting\n", Server.Name, SERVER_PLATFORM, NFSU_LAN_VERSION);
+	sprintf(log, "%s NFSU-Online server [%s] v %s is starting\n", Server.Name, SERVER_PLATFORM, NFSU_LAN_VERSION);
 	Log(log);
 	
 #ifdef _WIN32
@@ -1797,11 +1797,11 @@ VOID WINAPI ServiceMain( DWORD argc, LPTSTR *argv )
     ServiceStatus.dwCheckPoint         = 0; 
     ServiceStatus.dwWaitHint           = 0; 
  
-    ServiceStatusHandle = RegisterServiceCtrlHandler( "NFSU:LAN", ServiceCtrlHandler ); 
+    ServiceStatusHandle = RegisterServiceCtrlHandler( "NFSU-Online", ServiceCtrlHandler ); 
  
     if ( ServiceStatusHandle == (SERVICE_STATUS_HANDLE) 0 ) 
     { 
-        sprintf(g_Msg, "NFSU:LAN RegisterServiceCtrlHandler() failed %d\n", GetLastError() ); 
+        sprintf(g_Msg, "NFSU-Online RegisterServiceCtrlHandler() failed %d\n", GetLastError() ); 
         WriteInLogFile( g_Msg );
         return; 
     } 
@@ -1825,7 +1825,7 @@ VOID WINAPI ServiceMain( DWORD argc, LPTSTR *argv )
  
     if ( !SetServiceStatus( ServiceStatusHandle, &ServiceStatus ) ) 
     { 
-        sprintf( g_Msg,"NFSU:LAN SetServiceStatus() error %ld\n", GetLastError() ); 
+        sprintf( g_Msg,"NFSU-Online SetServiceStatus() error %ld\n", GetLastError() ); 
         WriteInLogFile(g_Msg);
     } 
 
@@ -1841,7 +1841,7 @@ VOID WINAPI ServiceMain( DWORD argc, LPTSTR *argv )
 	 
 		if ( !SetServiceStatus( ServiceStatusHandle, &ServiceStatus ) ) 
 		{ 
-			sprintf( g_Msg,"NFSU:LAN SetServiceStatus() error %ld\n", GetLastError() ); 
+			sprintf( g_Msg,"NFSU-Online SetServiceStatus() error %ld\n", GetLastError() ); 
 			WriteInLogFile(g_Msg);
 		} 
 
@@ -1873,7 +1873,7 @@ int main(int argc, char* argv[]){
 //	The SERVICE_TABLE_ENTRY structure is used by the StartServiceCtrlDispatcher function
 //	to specify the ServiceMain function for a service that can run in the calling process.
 
-	SERVICE_TABLE_ENTRY DispatchTable[] = { { "NFSU:LAN", ServiceMain }, { 0, 0 } };
+	SERVICE_TABLE_ENTRY DispatchTable[] = { { "NFSU-Online", ServiceMain }, { 0, 0 } };
 
     sprintf( g_Msg, "Log opened\n" );
     WriteInLogFile( g_Msg );
@@ -1894,7 +1894,7 @@ int main(int argc, char* argv[]){
 
         if (scmHandle == NULL) // Perform error handling.
         {
-            sprintf( g_Msg, "NFSU:LAN OpenSCManager error = %d\n", GetLastError() ); 
+            sprintf( g_Msg, "NFSU-Online OpenSCManager error = %d\n", GetLastError() ); 
             WriteInLogFile(g_Msg);
         }
 
@@ -1909,8 +1909,8 @@ int main(int argc, char* argv[]){
         SC_HANDLE scHandle;
 		scHandle = CreateService (
 			scmHandle, 
-			"NFSU:LAN", 
-            "NFSU:LAN", 
+			"NFSU-Online", 
+            "NFSU-Online", 
 			SERVICE_ALL_ACCESS, 
             SERVICE_WIN32_OWN_PROCESS, 
             SERVICE_AUTO_START, 
@@ -1919,10 +1919,10 @@ int main(int argc, char* argv[]){
 
         if ( scHandle == NULL ) // Process error
         {
-            sprintf(g_Msg, " NFSU:LAN CreateService error = %d\n", GetLastError() ); 
+            sprintf(g_Msg, " NFSU-Online CreateService error = %d\n", GetLastError() ); 
             WriteInLogFile(g_Msg);
 		}else{
-			printf("NFSU:LAN service installed...");
+			printf("NFSU-Online service installed...");
 		}
 
         CloseServiceHandle(scHandle);
@@ -1935,14 +1935,14 @@ int main(int argc, char* argv[]){
 
         if (scmHandle == NULL) // Perform error handling.
         {
-            sprintf(g_Msg, "NFSU:LAN OpenSCManager error = %d\n", GetLastError() ); 
+            sprintf(g_Msg, "NFSU-Online OpenSCManager error = %d\n", GetLastError() ); 
             WriteInLogFile(g_Msg);
         }
    
 		SC_HANDLE scHandle;
-        scHandle = OpenService( scmHandle, "NFSU:LAN", SERVICE_ALL_ACCESS );
+        scHandle = OpenService( scmHandle, "NFSU-Online", SERVICE_ALL_ACCESS );
 		if(DeleteService( scHandle )!=0){
-	        printf("NFSU:LAN service uninstalled...");
+	        printf("NFSU-Online service uninstalled...");
 		}else{
 			switch(GetLastError()){
 				case ERROR_ACCESS_DENIED:
@@ -1965,7 +1965,7 @@ int main(int argc, char* argv[]){
 		SC_HANDLE scHandle;
 
 		SC_HANDLE scmHandle = OpenSCManager (NULL, NULL, SC_MANAGER_ALL_ACCESS);
-        scHandle = OpenService( scmHandle, "NFSU:LAN", SERVICE_ALL_ACCESS );
+        scHandle = OpenService( scmHandle, "NFSU-Online", SERVICE_ALL_ACCESS );
 
 		if(scHandle){
 			CloseHandle(scHandle);
