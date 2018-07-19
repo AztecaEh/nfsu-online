@@ -96,26 +96,33 @@ void LogTraffic( char *log, int len ){
 };
 
 void LoadNews(){
-    FILE * fil;
-    fil = fopen("news", "r");
+	char log[1024];
+	sprintf(log, "Starting news thread,\n");
+	while (running) {
+		if (Verbose == 1)
+			sprintf(log, "Reloading news.\n");
+		FILE * fil;
+		fil = fopen("news", "r");
+		if (fil == NULL) {
+			news = _strdup(DEFAULT_NEWS);
+			return;
+		}
 
-    if (fil == NULL){
-        news = _strdup(DEFAULT_NEWS);
-        return;
-    }
+		fseek(fil, 0, SEEK_END);
+		int siz = ftell(fil);
+		fseek(fil, 0, SEEK_SET);
 
-    fseek(fil, 0, SEEK_END);
-    int siz = ftell(fil);
-    fseek(fil, 0, SEEK_SET);
+		if (siz > 10238) siz = 10238;
 
-    if(siz>10238) siz=10238;
+		if (news != NULL)
+			free(news);
 
-    if (news != NULL)
-        free(news);
+		news = (char*)calloc(siz + 1, sizeof(char));
+		fread(news, siz, 1, fil);
+		fclose(fil);
 
-    news=(char*)calloc(siz+1, sizeof(char));
-    fread(news, siz, 1, fil);
-    fclose(fil);
+		Sleep(300000);
+	}
 };
 
 threadfunc IOThread(void * Dummy){
